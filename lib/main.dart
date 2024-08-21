@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:exemplo_retrofit/api_client.dart';
+import 'package:exemplo_retrofit/login.dart';
 import 'package:exemplo_retrofit/response_data.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -70,13 +73,14 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
-      final dio = Dio(BaseOptions(contentType: "application/json"));
-      final client = ApiClient(dio);
-      client.getUsers().then((it) => {
+      // final dio = Dio(BaseOptions(contentType: "application/json"));
+      // final client = ApiClient(dio);
+      // client.getUsers().then((it) => {
         //print(it.data)
-        it.data.forEach((item) => print(item))
+        // it.data.forEach((item) => print(item))
         //logger.i(it);
-      });
+      // });
+      postData();
     });
   }
 
@@ -98,35 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
+      body: _buildBody(context),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -144,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
           final ResponseData? posts = snapshot.data;
           return _buildListView(context, posts!);
         } else {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }
@@ -157,14 +133,14 @@ class _MyHomePageState extends State<MyHomePage> {
       itemBuilder: (context, index) {
         return Card(
           child: ListTile(
-            leading: Icon(
+            leading: const Icon(
               Icons.account_box,
               color: Colors.green,
               size: 50,
             ),
             title: Text(
               posts.data[index]['name'],
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
             ),
             subtitle: Text(posts.data[index]['email']),
           ),
@@ -173,4 +149,39 @@ class _MyHomePageState extends State<MyHomePage> {
       itemCount: posts.data.length,
     );
   }
+
+  Future<void> postData() async {
+    var data = json.encode({"email": "atxaloisio@gmail.com", "password": "Pass4ptec@"});
+    var headers = {
+  'Content-Type': 'application/json'
+};
+    Dio dio2 = Dio(
+      BaseOptions(
+        baseUrl: 'http://localhost:5164',
+        connectTimeout: const Duration(milliseconds: 5000) ,
+        receiveTimeout: const Duration(milliseconds: 3000) ,
+      ),
+    );
+    try {
+      Response response = await dio2.post(
+        '/v1/identity/login',
+        data: data,
+        options: Options(headers: headers)
+      );
+      print(response.data);
+      //var login = parseLogin(response.data);
+      var login = Login.fromJson(response.data);
+      print(login.toString());
+    } on DioError catch (e) {
+      print(e.message);
+    }
+  }
+
+  Login parseLogin(Map<String, dynamic> map) {
+    //Map<String, dynamic> map = jsonDecode(responseBody);
+    Login login = Login.fromJson(map);
+    return login;
+  }
 }
+
+
