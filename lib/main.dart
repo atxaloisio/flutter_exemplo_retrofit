@@ -172,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //var login = parseLogin(response.data);
       var login = Login.fromJson(response.data);
       print(login.toString());
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print(e.message);
     }
   }
