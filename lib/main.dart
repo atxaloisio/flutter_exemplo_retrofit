@@ -153,8 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> postData() async {
     var data = json.encode({"email": "atxaloisio@gmail.com", "password": "Pass4ptec@"});
     var headers = {
-  'Content-Type': 'application/json'
-};
+      'Content-Type': 'application/json'
+    };
     Dio dio2 = Dio(
       BaseOptions(
         baseUrl: 'http://localhost:5164',
